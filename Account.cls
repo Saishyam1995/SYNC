@@ -7,7 +7,7 @@ public with sharing class OpportunityCreator {
             throw new IllegalArgumentException('Account Ids must not be null or empty.');
         }
 
-        // Check CRUD permissions
+        // Check CRUD 
         if (!Schema.sObjectType.Account.isAccessible()) {
             throw new CustomException('Insufficient permissions to access Accounts.');
         }
