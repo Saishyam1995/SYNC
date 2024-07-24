@@ -55,5 +55,5 @@ public with sharing class OpportunityCreator {
     }
 
     // Custom exception class
-    public class CustomException extends Exception {}
+    public class CustomException extends Exception {
 }
