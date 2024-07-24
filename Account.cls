@@ -1,4 +1,4 @@
-public with sharing class OpportunityCreator {
+public with sharing class OpportunityCreator 
 
     // Method to create an Opportunity for a given Account Id
     public static void createOpportunitiesFromAccounts(List<Id> accountIds) {
