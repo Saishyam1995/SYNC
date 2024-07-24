@@ -7,7 +7,7 @@ public with sharing class OpportunityCreator {
             throw new IllegalArgumentException('Account Ids must not be null or empty.');
         }
 
-        // Check CRUD 
+        // Check CRUD permissions
         if (!Schema.sObjectType.Account.isAccessible()) {
             throw new CustomException('Insufficient permissions to access Accounts.');
         }
@@ -20,6 +20,9 @@ public with sharing class OpportunityCreator {
         try {
             // Query Accounts to ensure they exist
             List<Account> accounts = [SELECT Id, Name FROM Account WHERE Id IN :accountIds];
+            if (accounts.isEmpty()) {
+                throw new CustomException('No matching accounts found for the provided IDs.');
+            }
 
             // Create an Opportunity for each Account
             for (Account account : accounts) {
@@ -34,13 +37,19 @@ public with sharing class OpportunityCreator {
 
             // Insert Opportunities in bulk
             if (!opportunities.isEmpty()) {
-                insert opportunities;
-                System.debug('Opportunities created: ' + opportunities);
+                Database.SaveResult[] results = Database.insert(opportunities, false);
+                for (Database.SaveResult sr : results) {
+                    if (!sr.isSuccess()) {
+                        for (Database.Error err : sr.getErrors()) {
+                            System.debug('Opportunity creation error: ' + err.getMessage());
+                        }
+                    }
+                }
             }
         } catch (Exception e) {
             // Log exception details
             System.debug('Exception when creating opportunities: ' + e.getMessage());
-            // Optionally, throw a custom exception or handle it according to your application's needs
+            System.debug('Stack Trace: ' + e.getStackTraceString());
             throw new CustomException('Error occurred while creating opportunities: ' + e.getMessage());
         }
     }
