@@ -11,7 +11,7 @@ public class opportunityAutoNumberGeneratorHandler {
             For(Opportunity opp : listOfOpp){
                 If(opp.Orginal_Opportunity__c == null && opp.primaryOpportunity__c == null){
                     listOfOriginalOpportunities.add(opp);
-                
+                }
                 
                 If(opp.Orginal_Opportunity__c !=null && opp.Project_Type__c == 'Event'){
                     If(mapOfOppwithMonthlyChildOpportunityOpp.containsKey(opp.Orginal_Opportunity__c)){
@@ -130,4 +130,3 @@ public class opportunityAutoNumberGeneratorHandler {
     }
     
     
-}
