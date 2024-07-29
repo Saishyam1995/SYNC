@@ -27,5 +27,4 @@ public class AccountHelper {
         if (acc.Type == 'Prospect') {
             delete acc;
         }
-    }
-}
+    
