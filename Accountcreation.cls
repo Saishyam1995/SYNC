@@ -1,54 +1,31 @@
-public with sharing class QuoteCreator {
-
-    // Method to create a Quote for a given Opportunity Id
-    public static void createQuotesFromOpportunities(List<Id> opportunityIds) {
-        // Validate input
-        if (opportunityIds == null || opportunityIds.isEmpty()) {
-            throw new IllegalArgumentException('Opportunity Ids must not be null or empty.');
+public class AccountHelper {
+    // This method retrieves accounts based on a given name and returns a list of accounts
+    public List<Account> getAccountsByName(String accountName) {
+        // Issue: Query inside a loop (potential for SOQL injection)
+        for (Account acc : [SELECT Id, Name FROM Account WHERE Name LIKE :('%' + accountName + '%')]) {
+            System.debug('Account Name: ' + acc.Name);
         }
-
-        // Check CRUD permissions
-        if (!Schema.sObjectType.Opportunity.isAccessible()) {
-            throw new CustomException('Insufficient permissions to access Opportunities.');
-        }
-
-        if (!Schema.sObjectType.Quote.isCreateable()) {
-            throw new CustomException('Insufficient permissions to create Quotes.');
-        }
-
-        List<Quote> quotes = new List<Quote>();
-        try {
-            // Query Opportunities to ensure they exist
-            List<Opportunity> opportunities = [SELECT Id, Name, AccountId FROM Opportunity WHERE Id IN :opportunityIds];
-
-            // Create a Quote for each Opportunity
-            for (Opportunity opp : opportunities) {
-                Quote quote = new Quote(
-                    Name = opp.Name + ' Quote',
-                    OpportunityId = opp.Id,
-                    AccountId = opp.AccountId,
-                    ExpirationDate = Date.today().addDays(30) // Set an expiration date 30 days from today
-                );
-                quotes.add(quote);
-            }
-
-            // Insert Quotes in bulk
-            if (!quotes.isEmpty()) {
-                insert quotes;
-                System.debug('Quotes created: ' + quotes);
-            }
-        } catch (DmlException e) {
-            // Log exception details
-            System.debug('DML Exception when creating quotes: ' + e.getMessage());
-            // Optionally, handle the exception more thoroughly depending on your needs
-            throw new CustomException('Error occurred while creating quotes: ' + e.getMessage());
-        } catch (Exception e) {
-            // Handle any other exceptions
-            System.debug('General Exception: ' + e.getMessage());
-            throw new CustomException('An unexpected error occurred: ' + e.getMessage());
-        }
+        return null; // Issue: Method should return a list of accounts, not null
     }
 
-    // Custom exception class
-    public class CustomException extends Exception {}
+    // This method updates the industry of accounts to the given industry
+    public void updateAccountIndustry(String industry) {
+        // Issue: No null check for the industry parameter
+        List<Account> accountsToUpdate = [SELECT Id, Industry FROM Account WHERE Industry = null];
+        for (Account acc : accountsToUpdate) {
+            acc.Industry = industry;
+        }
+        // Issue: DML operation without a try-catch block
+        update accountsToUpdate;
+    }
+
+    // This method deletes accounts with a certain type
+    public void deleteAccountsByType(String accountType) {
+        // Issue: No bulk-safe code (only processes one record)
+        Account acc = [SELECT Id FROM Account WHERE Type = :accountType LIMIT 1];
+        // Issue: Hard-coded type value check
+        if (acc.Type == 'Prospect') {
+            delete acc;
+        }
+    }
 }
